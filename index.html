@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Happy Birthday Space Scrapbook</title>
+<style>
+  /* Reset & base */
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0; padding: 0;
+    height: 100%;
+    background: radial-gradient(circle at center, #000000, #05010a);
+    color: #ffd700;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+    user-select: none;
+  }
+  #stars {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: twinkle 3s infinite alternate;
+  }
+  @keyframes twinkle {
+    0% {opacity: 0.3;}
+    100% {opacity: 1;}
+  }
+
+  /* Center container for all content */
+  #app {
+    position: relative;
+    z-index: 10;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  /* Countdown */
+  #countdown {
+    font-size: 12rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    user-select: none;
+  }
+
+  /* Birthday screen */
+  #birthdayScreen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+  }
+  #birthdayScreen h1 {
+    font-size: 4rem;
+    margin: 1rem 0 2rem 0;
+    text-shadow: 0 0 10px #ffd700;
+  }
+  #monkeyContainer {
+    width: 220px;
+    height: 220px;
+    margin-bottom: 2rem;
+    animation: monkeyBounce 2s ease-in-out infinite;
+  }
+  #monkeyContainer img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  @keyframes monkeyBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-25px); }
+  }
+
+  /* Falling "😘  💕  😍  ❤️ " rain */
+  #fallingTextContainer {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    overflow: visible;
+  }
+  .fallingText {
+    position: absolute;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #ffd700;
+    text-shadow: 0 0 5px #ffea00;
+    user-select: none;
+    animation-name: fallDown;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  @keyframes fallDown {
+    0% {
+      transform: translateY(-2rem);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(110vh);
+      opacity: 0;
+    }
+  }
+
+  /* Next button */
+  #nextBtn {
+    margin-top: 3rem;
+    background: #ffd700;
+    border: none;
+    color: black;
+    font-weight: 700;
+    font-size: 1.3rem;
+    padding: 0.7rem 2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 0 0 10px #ffd700;
+    transition: background-color 0.3s ease;
+  }
+  #nextBtn:hover {
+    background: #e6c200;
+  }
+
+  /* Scrapbook */
+  #scrapbookScreen {
+    display: none;
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  #scrapbookClosed {
+  cursor: pointer;
+  user-select: none;
+  text-align: center;
+  width: 425px; /* Half of the open scrapbook width (850px / 2) */
+  height: 520px; /* Same height as open scrapbook */
+  background: linear-gradient(145deg, #4b2e05, #3a2203); /* Dark brown gradient */
+  border-radius: 15px 0 0 15px; /* Rounded corners on left side only */
+  box-shadow: 0 0 30px #8b5e00cc inset; /* Inner glow for leather effect */
+  position: relative;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #ffd700cc;
+  font-size: 1.3rem;
+  text-shadow: 0 0 5px #ffd700aa;
+  border-right: 3px solid #8b5e00; /* Simulate book spine edge */
+}
+
+#scrapbookClosed img {
+  display: none; /* Hide the image inside closed scrapbook */
+}
+
+#scrapbookClosed p {
+  margin-top: 0;
+  padding: 0 1rem;
+}
+
+/* Responsive adjustment */
+@media (max-width: 900px) {
+  #scrapbookClosed {
+    width: 90vw;
+    height: 300px;
+    border-radius: 15px;
+    border-right: none;
+  }
+}
+  #scrapbookOpen {
+    display: none;
+    width: 850px;
+    max-width: 95vw;
+    height: 520px;
+    background: #111;
+    border-radius: 15px;
+    box-shadow: 0 0 30px #ffd700cc;
+    overflow: hidden;
+    perspective: 1500px;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    flex-direction: row;
+  }
+  #scrapbookOpen .page {
+    width: 50%;
+    height: 100%;
+    background: #222;
+    box-shadow: inset 0 0 20px #ffd70088;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+    backface-visibility: hidden;
+    border-radius: 0 15px 15px 0;
+  }
+  #scrapbookOpen .page.left {
+    border-radius: 15px 0 0 15px;
+  }
+  #scrapbookOpen .page img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 12px;
+    box-shadow: 0 0 15px #ffd700aa;
+    object-fit: contain;
+  }
+  #scrapbookOpen .note {
+    margin-top: 1rem;
+    font-size: 1.2rem;
+    color: #ffd700;
+    text-align: left;
+    line-height: 1.4;
+    max-height: 100%;
+    overflow-y: auto;
+  }
+
+  /* Page flip animation */
+ #scrapbookOpen {
+  perspective: 1500px; /* keep existing */
+  position: relative;
+  overflow: visible; /* allow shadows */
+}
+
+#scrapbookOpen.flipping .page.right {
+  animation: pageTurnRight 0.8s forwards ease-in-out;
+  transform-origin: left center;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.7);
+  z-index: 5;
+  position: relative;
+}
+
+#scrapbookOpen.flipping .page.left {
+  animation: pageTurnLeft 0.8s forwards ease-in-out;
+  transform-origin: right center;
+  box-shadow: inset 0 0 20px rgba(255, 215, 0, 0.5);
+  z-index: 4;
+  position: relative;
+}
+
+@keyframes pageTurnRight {
+  0% {
+    transform: rotateY(0deg);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.7);
+  }
+  100% {
+    transform: rotateY(-180deg);
+    box-shadow: none;
+  }
+}
+
+@keyframes pageTurnLeft {
+  0% {
+    transform: rotateY(0deg);
+    box-shadow: inset 0 0 20px rgba(255, 215, 0, 0.5);
+  }
+  100% {
+    transform: rotateY(10deg);
+    box-shadow: inset 0 0 40px rgba(255, 215, 0, 0.8);
+  }
+}
+
+/* Optional: improve shadows and backface visibility */
+#scrapbookOpen .page.right {
+  box-shadow: 0 0 15px #ffd700aa;
+  backface-visibility: hidden;
+}
+
+#scrapbookOpen .page.left {
+  box-shadow: inset 0 0 15px #ffd700aa;
+  backface-visibility: hidden;
+}
+  /* Final message */
+  #finalScreen {
+    display: none;
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+    color: #ffd700;
+    text-align: center;
+    user-select: none;
+  }
+  #finalScreen h1 {
+    font-size: 4rem;
+    font-weight: 900;
+    margin-top: 15vh;
+    text-shadow: 0 0 15px #ffd700;
+  }
+  #spaceScene {
+    position: relative;
+    margin-top: 3rem;
+    width: 100%;
+    height: 300px;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  #earth, #moon {
+    position: absolute;
+    bottom: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #ffd700aa;
+  }
+  #earth {
+    left: 5%;
+    width: 180px;
+    height: 180px;
+    background: url("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExenJsdGJqdXNzOTR6dTN1am95MDBiMndwdjNkdm52eTNmc2pyaHR6cCZlcD12MV9zdGlja2Vyc19zZWFyY2gmY3Q9cw/yo1whaKkz38ME/giphy.gif") center/cover no-repeat;
+  }
+  #moon {
+    right: 5%;
+    width: 120px;
+    height: 120px;
+    background: url("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdTNjaDd3bjVib3gzc2dnandicnoxNW84bzh2c245bXp5OTM4ZnlzYiZlcD12MV9zdGlja2Vyc19zZWFyY2gmY3Q9cw/wMQTobBKTpmg5TLuZ5/giphy.gif") center/cover no-repeat;
+  }
+  #rocket {
+    position: absolute;
+    bottom: 50px;
+    width: 100px;
+    height: 60px;
+    background: url("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOXZ1OHg4NnZ3bWl5dHQ5cHg3YXNla3g4ZWR3ODFmcXFhYzRmdXczNSZlcD12MV9zdGlja2Vyc19zZWFyY2gmY3Q9cw/GMldrCik4kIpoVGHkH/giphy.gif") center/contain no-repeat;
+    animation: rocketTravel 10s linear infinite;
+  }
+  @keyframes rocketTravel {
+    0% {
+      left: 5%;
+      transform: translate(0, 0) scaleX(1);
+    }
+    45% {
+      left: calc(95% - 100px);
+      transform: translate(0, -50px) scaleX(1);
+    }
+    50% {
+      transform: translate(0, -50px) scaleX(-1);
+    }
+    95% {
+      left: 5%;
+      transform: translate(0, 0) scaleX(-1);
+    }
+    100% {
+      transform: translate(0, 0) scaleX(1);
+    }
+  }
+
+  /* Scrollbar for notes */
+  .note::-webkit-scrollbar {
+    width: 6px;
+  }
+  .note::-webkit-scrollbar-thumb {
+    background: #ffd700aa;
+    border-radius: 3px;
+  }
+  .note::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    #scrapbookOpen {
+      flex-direction: column;
+      height: auto;
+      width: 90vw;
+      max-width: none;
+    }
+    #scrapbookOpen .page {
+      width: 100%;
+      height: 300px;
+      border-radius: 15px 15px 0 0;
+    }
+    #scrapbookOpen .page.left {
+      border-radius: 15px 15px 0 0;
+    }
+    #scrapbookOpen .page.right {
+      border-radius: 0 0 15px 15px;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="stars"></div>
+
+<div id="app">
+  <!-- Countdown -->
+  <div id="countdown" aria-live="polite" aria-atomic="true">3</div>
+
+  <!-- Birthday Screen -->
+  <section id="birthdayScreen" aria-label="Birthday Celebration" role="region">
+    <h1>Happy Birthday Dodo 🦤!</h1>
+    <div id="monkeyContainer" aria-label="Animated cute monkey celebrating birthday">
+      <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdGVreTk2aWtudWRnemU5YW04YnR5ZGdwNm95OTA0eGV0bHMyeGRwYSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/XxIOjLzNTQLsP1hjok/giphy.gif" alt="Cute animated monkey with party hat and balloons jumping joyfully" />
+    </div>
+    <div id="fallingTextContainer" aria-hidden="true"></div>
+    <button id="nextBtn" aria-label="Go to scrapbook">Next</button>
+  </section>
+
+  <!-- Scrapbook Screen -->
+  <section id="scrapbookScreen" aria-label="Birthday Scrapbook" role="region">
+    <div id="scrapbookClosed" tabindex="0" role="button" aria-pressed="false" aria-label="Closed scrapbook, tap to open">
+      <img src="https://placehold.co/320x200/png?text=Closed+Scrapbook" alt="Closed scrapbook with leather cover and golden locks" />
+      <p>Tap to Open</p>
+    </div>
+    <div id="scrapbookOpen" aria-live="polite" aria-atomic="true" tabindex="0" role="button" aria-label="Open scrapbook page, tap to turn page">
+      <div class="page left">
+        <img src="" alt="" id="pagePhoto" />
+      </div>
+      <div class="page right">
+        <p class="note" id="pageNote"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final Screen -->
+  <section id="finalScreen" aria-label="Final message" role="region">
+    <h1>I Love You to the Moon and Back!</h1>
+    <div id="spaceScene" aria-hidden="true">
+      <div id="earth" role="img" aria-label="Blue Earth with continents and oceans glowing softly in space"></div>
+      <div id="moon" role="img" aria-label="Gray Moon with craters visible and subtle glow from Earth"></div>
+      <div id="rocket" aria-label="Cute teddy bear in a rocket traveling between Earth and Moon"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+  // Generate stars
+  const starsContainer = document.getElementById('stars');
+  const starCount = 150;
+  for (let i = 0; i < starCount; i++) {
+    const star = document.createElement('div');
+    star.classList.add('star');
+    const size = Math.random() * 2 + 0.5;
+    star.style.width = size + 'px';
+    star.style.height = size + 'px';
+    star.style.top = Math.random() * 100 + 'vh';
+    star.style.left = Math.random() * 100 + 'vw';
+    star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+    starsContainer.appendChild(star);
+  }
+
+  // Countdown logic
+  const countdownEl = document.getElementById('countdown');
+  const birthdayScreen = document.getElementById('birthdayScreen');
+  const nextBtn = document.getElementById('nextBtn');
+  const fallingTextContainer = document.getElementById('fallingTextContainer');
+  const scrapbookScreen = document.getElementById('scrapbookScreen');
+  const scrapbookClosed = document.getElementById('scrapbookClosed');
+  const scrapbookOpen = document.getElementById('scrapbookOpen');
+  const pagePhoto = document.getElementById('pagePhoto');
+  const pageNote = document.getElementById('pageNote');
+  const finalScreen = document.getElementById('finalScreen');
+
+  let countdown = 3;
+  let countdownInterval = setInterval(() => {
+    countdown--;
+    if (countdown > 0) {
+      countdownEl.textContent = countdown;
+    } else {
+      clearInterval(countdownInterval);
+      countdownEl.style.display = 'none';
+      birthdayScreen.style.display = 'flex';
+      startFallingText();
+    }
+  }, 1000);
+
+  // Falling "😘  💕  😍  ❤️" rain
+  function startFallingText() {
+    // Create multiple falling text elements continuously
+    const maxTexts = 20;
+    let created = 0;
+    const interval = setInterval(() => {
+      if (created >= maxTexts) {
+        clearInterval(interval);
+        return;
+      }
+      createFallingText();
+      created++;
+    }, 300);
+  }
+  function createFallingText() {
+    const text = document.createElement('div');
+    text.className = 'fallingText';
+    text.textContent = '😘  💕  😍  ❤️';
+    text.style.left = Math.random() * 95 + 'vw';
+    text.style.animationDuration = (4 + Math.random() * 3) + 's';
+    text.style.fontSize = (12 + Math.random() * 10) + 'px';
+    fallingTextContainer.appendChild(text);
+    // Remove after animation
+    text.addEventListener('animationend', () => {
+      text.remove();
+    });
+  }
+
+  // Next button to scrapbook
+  nextBtn.addEventListener('click', () => {
+    birthdayScreen.style.display = 'none';
+    scrapbookScreen.style.display = 'flex';
+    scrapbookClosed.style.display = 'block';
+    scrapbookOpen.style.display = 'none';
+  });
+
+  // Scrapbook pages data (customizable)
+  const scrapbookPages = [
+    {
+      photo: "https://i.postimg.cc/KYSQWfLp/47146.jpg",
+      alt: 'feelings',
+      note: 'Dear DODO, With you, my heart is full. You make my world brighter.'   
+    },
+    {
+      photo: "https://i.postimg.cc/sfq6k7kW/IMG-3566.jpg",
+      alt: 'Stars shining in the night sky',
+      note: 'With you, I feel like I am home, where i really belong.'
+    },
+    {
+      photo: "https://i.postimg.cc/dtsbHsvZ/IMG-3564.jpg",
+      alt: 'Romantic couple holding hands',
+      note: 'Happy birthday to the man who makes my world go ‘round! Wishing you the best and nothing less on your special day!'
+    }
+  ];
+
+  let currentPageIndex = -1;
+
+  // Open scrapbook on tap/click
+  scrapbookClosed.addEventListener('click', openScrapbook);
+  scrapbookClosed.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openScrapbook();
+    }
+  });
+
+  function openScrapbook() {
+    scrapbookClosed.style.display = 'none';
+    scrapbookOpen.style.display = 'flex';
+    currentPageIndex = 0;
+    showPage(currentPageIndex);
+  }
+
+  // Show page content
+  function showPage(index) {
+    if (index < 0 || index >= scrapbookPages.length) return;
+    const page = scrapbookPages[index];
+    pagePhoto.src = page.photo;
+    pagePhoto.alt = page.alt;
+    pageNote.textContent = page.note;
+  }
+
+  // Flip page on tap/click on open scrapbook
+  scrapbookOpen.addEventListener('click', flipPage);
+  scrapbookOpen.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      flipPage();
+    }
+  });
+
+  let flipping = false;
+ function flipPage() {
+  if (flipping) return;
+  flipping = true;
+  scrapbookOpen.classList.add('flipping');
+  setTimeout(() => {
+    scrapbookOpen.classList.remove('flipping');
+    currentPageIndex++;
+    if (currentPageIndex < scrapbookPages.length) {
+      showPage(currentPageIndex);
+    } else {
+      // End of scrapbook, close it and show final message
+      scrapbookScreen.style.display = 'none';
+      finalScreen.style.display = 'block';
+    }
+    flipping = false;
+  }, 800); // updated from 600 to 800
+}
+</script>
+</body>
+</html>   
